@@ -1,12 +1,11 @@
 # MemePlaylistGenerator<br><br>
 
 This is a program which takes a sentence then finds a series of songs (via spotify) which spell out the orginal sentence - as close as it can.<br>
-As im using an API and i dont know how to setup it further and cant be asked to, here are some runs:<br>
-
-So if the outputed list is not perfect it is a result of the spotify search, searching "1" on spotify may not return "1" but "16" as that is a more popular song someone is more likey to search for.<br>
+As im using an API and i dont know how to setup it further and cant be asked to<br>
+So if the outputed list is not perfect it is a result of the spotify search,<br>searching "1" on spotify may not return "1" but "16" as that is a more popular song someone is more likey to search for.<br>
 This can be easily corrected as every digit and simple word has a song of that exact name as there are just so many songs<br>
-
-<br><br><br>
+Here are some runs:<br>
+<br><br>
 Enter sentence:<br>
 never gonna give you up never gonna let you down<br>
 List #1 ========================================================================================================<br>
