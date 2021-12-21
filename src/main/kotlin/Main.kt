@@ -1,10 +1,8 @@
 import com.adamratzman.spotify.endpoints.pub.SearchApi
 import com.adamratzman.spotify.models.Track
 import com.adamratzman.spotify.spotifyAppApi
-import com.adamratzman.spotify.utils.Language
 import java.io.File
 import java.io.InputStream
-import kotlin.math.min
 import kotlin.math.pow
 
 suspend fun main() {
@@ -13,8 +11,6 @@ suspend fun main() {
 	if (inputSentence.isEmpty()) return
 	val combinations = generateBreaks(inputSentence)
 
-	combinations.forEach { println(it) }
-
 	val inputStream: InputStream = File("C:/Users/theto/OneDrive/Desktop/spotify api keys.txt").inputStream()
 	val lineList = mutableListOf<String>()
 	inputStream.bufferedReader().forEachLine { lineList.add(it) }
@@ -22,8 +18,9 @@ suspend fun main() {
 	val clientSecret = lineList[1]
 	val api = spotifyAppApi(clientId, clientSecret).build()
 
-	val playlists = mutableListOf<MutableList<Track>>()
+//	val playlists = mutableListOf<MutableList<Track>>()
 	var count = 0
+	var bestPlaylistScore = Int.MAX_VALUE
 	combinationLoop@ for (phrases in combinations) {
 		val tracks = mutableListOf<Track>()
 		for (phrase in phrases) {
@@ -39,31 +36,40 @@ suspend fun main() {
 				}
 			}
 		}
-		playlists.add(tracks)
-		count++
-		println("List #${count} ".padEnd(112, '='))
+		if (levenshtein(tracks.joinToString(" ") { it.name }, inputSentence) <= bestPlaylistScore) {
+			bestPlaylistScore = levenshtein(tracks.joinToString(" ") { it.name }, inputSentence)
+			println("List #${++count} ".padEnd(112, '='))
 		tracks.forEach { x ->
-			println("\t${String.format("%-30s", x.name)}${String.format("%-70s", x.externalUrls.spotify)}${x.artists.map { y -> y.name }}")
+			println("\t${String.format("%-30s", x.name)}${String.format("%-60s", x.externalUrls.spotify)}${x.artists.map { y -> y.name }}")
 		}
 		println("================================================================================================================\n")
-	}
-
-	val fullStringList = mutableListOf<String>()
-	var bestSoFarScore = Int.MAX_VALUE
-	var bestSoFarIndex = 0
-	for (index in playlists.indices) {
-		fullStringList.add(playlists[index].joinToString(" "))
-		if (levenshtein(fullStringList.last(), inputSentence) <= bestSoFarScore) {
-			bestSoFarScore = levenshtein(fullStringList.last(), inputSentence)
-			bestSoFarIndex = index
 		}
+//		playlists.add(tracks)
+//		count++
+//		println("List #${count} ".padEnd(112, '='))
+//		tracks.forEach { x ->
+//			println("\t${String.format("%-30s", x.name)}${String.format("%-70s", x.externalUrls.spotify)}${x.artists.map { y -> y.name }}")
+//		}
+//		println("================================================================================================================\n")
 	}
 
-	println("List BEST ".padEnd(112, '='))
-	playlists[bestSoFarIndex].forEach { x ->
-		println("\t${String.format("%-30s", x.name)}${String.format("%-70s", x.externalUrls.spotify)}${x.artists.map { y -> y.name }}")
-	}
-	println("================================================================================================================\n")
+//	val fullStringList = mutableListOf<String>()
+//	var bestSoFarScore = Int.MAX_VALUE
+//	var bestSoFarIndex = 0
+//	for (index in playlists.indices) {
+//		fullStringList.add(playlists[index].joinToString(" ") { it.name })
+//		println("${fullStringList.last()}   ${levenshtein(fullStringList.last(), inputSentence)}")
+//		if (levenshtein(fullStringList.last(), inputSentence) <= bestSoFarScore) {
+//			bestSoFarScore = levenshtein(fullStringList.last(), inputSentence)
+//			bestSoFarIndex = index
+//		}
+//	}
+//
+//	println("List BEST ".padEnd(112, '='))
+//	playlists[bestSoFarIndex].forEach { x ->
+//		println("\t${String.format("%-30s", x.name)}${String.format("%-70s", x.externalUrls.spotify)}${x.artists.map { y -> y.name }}")
+//	}
+//	println("================================================================================================================\n")
 
 //	playlists.forEach {
 //		println("List #${playlists.indexOf(it) + 1}")
@@ -81,7 +87,6 @@ fun generateBreaks(input: String): MutableList<MutableList<String>> {
 	val breaks = MutableList(2.0.pow(inputList.size - 1).toInt()) { inputList.indices.toMutableList() }
 
 	for (i in 0 until 2.0.pow(inputList.size - 1).toInt()) {
-//		val binaryKey = String.format("%0${inputList.size - 1}d", Integer.toBinaryString(i).toInt())
 		val binaryKey = Integer.toBinaryString(i).padStart(inputList.size - 1, '0')
 		var offset = 1
 		for (cutIndex in binaryKey.indices) {
@@ -111,6 +116,9 @@ fun generateBreaks(input: String): MutableList<MutableList<String>> {
 	return stringBreaks
 }
 
+// https://gist.github.com/ademar111190/34d3de41308389a0d0d8
+// CREDIT GOES TO ademar111190
+// THANKS
 fun levenshtein(lhs : CharSequence, rhs : CharSequence) : Int {
 	val lhsLength = lhs.length + 1
 	val rhsLength = rhs.length + 1
