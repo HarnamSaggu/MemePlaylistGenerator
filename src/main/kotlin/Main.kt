@@ -18,7 +18,7 @@ suspend fun main() {
 	val clientSecret = lineList[1]
 	val api = spotifyAppApi(clientId, clientSecret).build()
 
-	var count = 0
+	var count = 1
 	var bestPlaylistScore = Int.MAX_VALUE
 	combinationLoop@ for (phrases in combinations) {
 		val tracks = mutableListOf<Track>()
@@ -36,20 +36,22 @@ suspend fun main() {
 				}
 			}
 		}
-		if (levenshtein(tracks.joinToString(" ") { it.name }, inputSentence) <= bestPlaylistScore) {
-			bestPlaylistScore = levenshtein(tracks.joinToString(" ") { it.name }, inputSentence)
-			println("List #${++count} ".padEnd(112, '='))
+
+		val phraseScore = levenshtein(tracks.joinToString(" ") { it.name }, inputSentence)
+		if (phraseScore <= bestPlaylistScore) {
+			bestPlaylistScore = phraseScore
+			println("List #${count++}")
 			tracks.forEach { x ->
 				println(
-					"\t${String.format("%-30s", x.name)}${
+					"\t${String.format("%-20s", x.name)}\t${
 						String.format(
 							"%-60s",
 							x.externalUrls.spotify
 						)
-					}${x.artists.map { y -> y.name }}"
+					}\t${x.artists.map { y -> y.name }}"
 				)
 			}
-			println("\n".padStart(113, '='))
+			println("\n\n")
 		}
 	}
 }
